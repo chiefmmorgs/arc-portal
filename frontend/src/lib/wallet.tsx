@@ -164,8 +164,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
                 defaultChain: ARC_TESTNET_CHAIN as any,
                 supportedChains: [ARC_TESTNET_CHAIN as any],
                 embeddedWallets: {
-                    createOnLogin: 'users-without-wallets',
+                    ethereum: {
+                        createOnLogin: 'users-without-wallets',
+                    },
+                    },
                 },
+
+
+
             }}
         >
             <WalletBridge>{children}</WalletBridge>
