@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* Dark blue-gray palette — inspired by the reference image */
+    --background: #050508;
+    --foreground: #ededed;
+
+    --card: #0a0a0f;
+    --card-foreground: #ededed;
+
+    --primary: #ededed;
+    --primary-foreground: #050508;
+
+    --secondary: #1e1e2e;
+    --secondary-foreground: #ededed;
+
+    --muted: #141420;
+    --muted-foreground: #71717a;
+
+    --accent: #1e1e2e;
+    --accent-foreground: #ededed;
+
+    --border: #1e1e2e;
+    --input: #1e1e2e;
+    --ring: #52525b;
+
+    --radius: 0.5rem;
+
+    /* Status colors — kept minimal */
+    --success: #22c55e;
+    --error: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection */
+::selection {
+    background: rgba(237, 237, 237, 0.15);
+    color: var(--foreground);
+}
+
+/* Focus ring */
+:focus-visible {
+    outline: 1px solid var(--ring);
+    outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ring);
+}
+
+/* Links */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Page transition — used with Barba.js */
+.barba-leave-active,
+.barba-enter-active {
+    transition: opacity 0.4s ease;
+}
+
+.barba-leave-to {
+    opacity: 0;
+}
+
+.barba-enter {
+    opacity: 0;
+}
+
+.barba-enter-to {
+    opacity: 1;
+}
+
+/* GSAP animation helpers */
+.gsap-fade-in {
+    opacity: 0;
+    transform: translateY(12px);
+}
+
+.gsap-slide-up {
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+.gsap-scale-in {
+    opacity: 0;
+    transform: scale(0.96);
+}
