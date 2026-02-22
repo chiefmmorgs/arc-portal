@@ -167,11 +167,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
                     ethereum: {
                         createOnLogin: 'users-without-wallets',
                     },
-                    },
                 },
-
-
-
             }}
         >
             <WalletBridge>{children}</WalletBridge>
