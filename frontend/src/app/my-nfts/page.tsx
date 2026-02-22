@@ -381,7 +381,7 @@ export default function MyNFTsPage() {
                             </p>
                         )}
 
-                        <div style={{ borderTop: '1px solid #27272a', paddingtop: '16px', marginBottom: '24px' }}>
+                        <div style={{ borderTop: '1px solid #27272a', paddingTop: '16px', marginBottom: '24px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #18181b' }}>
                                 <span style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Collection</span>
                                 <span style={{ color: '#ededed', fontSize: '0.85rem' }}>{selectedNFT.collectionName} ({selectedNFT.collectionSymbol})</span>
