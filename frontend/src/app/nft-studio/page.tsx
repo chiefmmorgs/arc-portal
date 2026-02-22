@@ -86,7 +86,7 @@ export default function NFTStudioPage() {
                 name: nftName,
                 description: nftDesc,
                 image: `ipfs://${imgRes.cid}`,
-                attributes: [{ trait_type: 'Creator', value: address }],
+                attributes: [{ trait_type: 'Creator', value: address || '' }],
             };
             const metaRes = await uploadMetadata({
                 ...metadataObj,
