@@ -1,4 +1,5 @@
-const API_BASE = '/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE = `${API_URL}/api`;
 
 export interface Validator {
     id: number;
@@ -53,7 +54,7 @@ export interface HealthStatus {
 
 // ── Health ────────────────────────────────────
 export async function fetchHealth(): Promise<HealthStatus> {
-    const res = await fetch('/health');
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/health`);
     return res.json();
 }
 

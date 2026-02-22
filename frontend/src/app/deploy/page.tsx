@@ -74,7 +74,7 @@ export default function DeployPage() {
             const message = `ARC-Portal:${JSON.stringify(body)}`;
             const signature = await signMessage(message);
 
-            const res = await fetch(`/api/deploy/${type}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/deploy/${type}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ export default function DeployPage() {
         setVerifyStatus('verifying');
         setVerifyMsg('Submitting to Blockscout...');
         try {
-            const res = await fetch('/api/deploy/verify', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/deploy/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contractAddress: addr, contractType, constructorArgs }),
