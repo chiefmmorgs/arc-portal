@@ -96,8 +96,8 @@ export default function MyNFTsPage() {
                     const [name, symbol, balance, totalSupply] = await Promise.all([
                         contract.name().catch(() => 'Unknown'),
                         contract.symbol().catch(() => '???'),
-                        contract.balanceOf(address).catch(() => 0n),
-                        contract.totalSupply().catch(() => 0n),
+                        contract.balanceOf(address).catch(() => BigInt(0)),
+                        contract.totalSupply().catch(() => BigInt(0)),
                     ]);
 
                     const bal = Number(balance);
