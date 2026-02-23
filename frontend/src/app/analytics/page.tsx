@@ -5,8 +5,7 @@ import { fetchValidators, fetchValidatorStats } from '@/lib/api';
 import type { Validator, ValidatorStats } from '@/lib/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
-/* Monochrome palette for charts — grays and subtle whites */
-const MONO_COLORS = ['#ededed', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a', '#18181b'];
+const CHART_COLORS = ['#0ae448', '#fec5fb', '#ff8709', '#00bae2', '#9d95ff', '#abff84', '#f100cb'];
 
 export default function AnalyticsPage() {
     const [validators, setValidators] = useState<Validator[]>([]);
@@ -22,148 +21,89 @@ export default function AnalyticsPage() {
     async function loadData() {
         try {
             const [v, s] = await Promise.all([fetchValidators(), fetchValidatorStats()]);
-            setValidators(v);
-            setStats(s);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
+            setValidators(v); setStats(s);
+        } catch (err) { console.error(err); }
+        finally { setLoading(false); }
     }
 
     if (loading) {
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '12px', color: '#a1a1aa' }}>
-                <div style={{
-                    width: 20, height: 20, border: '2px solid #1e1e2e', borderTopColor: '#ededed',
-                    borderRadius: '50%', animation: 'spin 0.8s linear infinite'
-                }} />
-                <p style={{ margin: 0 }}>Loading analytics...</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 12, color: 'var(--text-secondary)' }}>
+                <div style={{ width: 20, height: 20, border: '2px solid var(--border)', borderTopColor: 'var(--green)', borderRadius: '50%', animation: 'spin-slow 0.8s linear infinite' }} />
+                Loading analytics...
             </div>
         );
     }
 
-    const blockData = validators.map((v) => ({
+    const blockData = validators.map(v => ({
         name: v.address.slice(0, 8) + '...',
         produced: v.total_blocks,
         missed: v.missed_blocks,
         uptime: parseFloat(v.uptime_percentage),
     }));
 
-    const pieData = validators.map((v) => ({
-        name: v.address.slice(0, 10) + '...',
-        value: v.total_blocks,
-    }));
+    const pieData = validators.map(v => ({ name: v.address.slice(0, 10) + '...', value: v.total_blocks }));
 
     const totalProduced = parseInt(stats?.total_blocks || '0');
     const totalMissed = parseInt(stats?.total_missed || '0');
-    const networkHealth = totalProduced + totalMissed > 0
-        ? ((totalProduced / (totalProduced + totalMissed)) * 100).toFixed(1)
-        : '0';
+    const networkHealth = totalProduced + totalMissed > 0 ? ((totalProduced / (totalProduced + totalMissed)) * 100).toFixed(1) : '0';
 
-    /* ── Inline style objects ─────────────────────────────────────────── */
-    const S = {
-        page: { maxWidth: '1100px', margin: '0 auto', padding: '48px 24px', fontFamily: 'Inter, sans-serif' } as React.CSSProperties,
-        header: { marginBottom: '40px' } as React.CSSProperties,
-        h1: { fontSize: '1.5rem', fontWeight: 600, color: '#ededed', margin: '0 0 8px 0' } as React.CSSProperties,
-        subtitle: { color: '#a1a1aa', margin: 0, fontSize: '0.95rem' } as React.CSSProperties,
-        statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' } as React.CSSProperties,
-        statCard: {
-            background: '#0a0a0f', border: '1px solid #1e1e2e', borderRadius: '10px', padding: '20px',
-        } as React.CSSProperties,
-        statLabel: { color: '#a1a1aa', fontSize: '0.8rem', fontWeight: 500, textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '8px' },
-        statValue: { color: '#ededed', fontSize: '1.75rem', fontWeight: 600, lineHeight: 1.2, marginBottom: '4px' },
-        statSub: { color: '#52525b', fontSize: '0.78rem' },
-        chartsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' } as React.CSSProperties,
-        chartCard: {
-            background: '#0a0a0f', border: '1px solid #1e1e2e', borderRadius: '10px', padding: '24px',
-        } as React.CSSProperties,
-        chartTitle: { color: '#ededed', fontSize: '0.95rem', fontWeight: 500, margin: '0 0 20px 0' } as React.CSSProperties,
-        tableCard: {
-            background: '#0a0a0f', border: '1px solid #1e1e2e', borderRadius: '10px', padding: '24px', marginBottom: '32px',
-        } as React.CSSProperties,
-        table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.9rem' },
-        th: { color: '#a1a1aa', fontWeight: 500, textAlign: 'left' as const, padding: '10px 12px', borderBottom: '1px solid #1e1e2e', fontSize: '0.8rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em' },
-        td: { color: '#ededed', padding: '12px', borderBottom: '1px solid #1e1e2e' },
-        tdMuted: { color: '#a1a1aa', padding: '12px', borderBottom: '1px solid #1e1e2e', fontFamily: 'monospace', fontSize: '0.85rem' },
-    };
+    const tooltipStyle = { background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)' };
 
-    const tooltipStyle = {
-        background: '#18181b', border: '1px solid #1e1e2e', borderRadius: 8, color: '#ededed',
-    };
+    const statCards = [
+        { label: 'Network Health', value: `${networkHealth}%`, sub: 'Block success rate', color: 'var(--green)', glow: 'card-glow-green', gradient: 'text-gradient-green' },
+        { label: 'Active Validators', value: `${validators.length}`, sub: 'Currently tracked', color: 'var(--pink)', glow: 'card-glow-pink', gradient: 'text-gradient-purple' },
+        { label: 'Avg Uptime', value: `${parseFloat(stats?.avg_uptime || '0').toFixed(1)}%`, sub: 'Mean uptime', color: 'var(--blue)', glow: 'card-glow-blue', gradient: 'text-gradient-ocean' },
+        { label: 'Total Indexed', value: (totalProduced + totalMissed).toLocaleString(), sub: 'Blocks analyzed', color: 'var(--orange)', glow: 'card-glow-orange', gradient: 'text-gradient-sunset' },
+    ];
 
     return (
-        <div style={S.page}>
-            {/* Header */}
-            <header style={S.header}>
-                <h1 style={S.h1}>Analytics</h1>
-                <p style={S.subtitle}>Network performance overview and validator comparison</p>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 32px', position: 'relative' }}>
+            <div className="orb orb-blue" style={{ width: 400, height: 400, top: -100, right: -100 }} />
+            <div className="orb orb-green" style={{ width: 300, height: 300, bottom: 100, left: -80 }} />
+
+            <header className="animate-fade-up" style={{ marginBottom: 48 }}>
+                <h1 className="heading-xl text-gradient-ocean">Analytics</h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', marginTop: 8 }}>Network performance and validator stats.</p>
             </header>
 
-            {/* Summary Stats */}
-            <div style={S.statsGrid}>
-                <div style={S.statCard}>
-                    <div style={S.statLabel}>Network Health</div>
-                    <div style={S.statValue}>{networkHealth}%</div>
-                    <div style={S.statSub}>Produced / (Produced + Missed)</div>
-                </div>
-                <div style={S.statCard}>
-                    <div style={S.statLabel}>Active Validators</div>
-                    <div style={S.statValue}>{validators.length}</div>
-                    <div style={S.statSub}>Currently tracked</div>
-                </div>
-                <div style={S.statCard}>
-                    <div style={S.statLabel}>Avg Uptime</div>
-                    <div style={S.statValue}>{parseFloat(stats?.avg_uptime || '0').toFixed(1)}%</div>
-                    <div style={S.statSub}>Mean validator uptime</div>
-                </div>
-                <div style={S.statCard}>
-                    <div style={S.statLabel}>Total Indexed</div>
-                    <div style={S.statValue}>{(totalProduced + totalMissed).toLocaleString()}</div>
-                    <div style={S.statSub}>Blocks analyzed</div>
-                </div>
+            {/* Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 40 }}>
+                {statCards.map((s, i) => (
+                    <div key={s.label} className={`card ${s.glow} animate-fade-up delay-${i + 1}`} style={{ position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', top: 0, left: 24, right: 24, height: 2, background: s.color, opacity: 0.5, borderRadius: 2 }} />
+                        <div className="stat-label" style={{ marginBottom: 12, marginTop: 8 }}>{s.label}</div>
+                        <div className={`stat-value ${s.gradient}`}>{s.value}</div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 6 }}>{s.sub}</div>
+                    </div>
+                ))}
             </div>
 
             {/* Charts */}
-            <div style={S.chartsGrid}>
-                {/* Block Production Comparison */}
-                <div style={S.chartCard}>
-                    <h3 style={S.chartTitle}>Block Production: Produced vs Missed</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 40 }}>
+                <div className="card animate-fade-up delay-5">
+                    <h3 className="heading-md" style={{ margin: '0 0 20px 0' }}>Block Production</h3>
                     <ResponsiveContainer width="100%" height={280}>
                         <BarChart data={blockData}>
-                            <XAxis dataKey="name" stroke="#52525b" fontSize={12} tickLine={false} axisLine={{ stroke: '#1e1e2e' }} />
-                            <YAxis stroke="#52525b" fontSize={12} tickLine={false} axisLine={{ stroke: '#1e1e2e' }} />
-                            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-                            <Bar dataKey="produced" fill="#ededed" name="Produced" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="missed" fill="#52525b" name="Missed" radius={[4, 4, 0, 0]} />
+                            <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={{ stroke: 'var(--border)' }} />
+                            <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={{ stroke: 'var(--border)' }} />
+                            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(10,228,72,0.05)' }} />
+                            <Bar dataKey="produced" fill="#0ae448" name="Produced" radius={[6, 6, 0, 0]} />
+                            <Bar dataKey="missed" fill="#ff8709" name="Missed" radius={[6, 6, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Block Share */}
-                <div style={S.chartCard}>
-                    <h3 style={S.chartTitle}>Block Production Share</h3>
+                <div className="card animate-fade-up delay-5">
+                    <h3 className="heading-md" style={{ margin: '0 0 20px 0' }}>Block Share</h3>
                     <ResponsiveContainer width="100%" height={280}>
                         <PieChart>
-                            <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={100}
-                                paddingAngle={2}
-                                dataKey="value"
-                                stroke="#0a0a0f"
-                                strokeWidth={2}
-                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            >
-                                {pieData.map((_, i) => (
-                                    <Cell key={i} fill={MONO_COLORS[i % MONO_COLORS.length]} />
-                                ))}
+                            <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2}
+                                dataKey="value" stroke="var(--bg-card)" strokeWidth={2}
+                                label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                                {pieData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                             </Pie>
-                            <Legend
-                                formatter={(value: string) => <span style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>{value}</span>}
-                            />
+                            <Legend formatter={(value: string) => <span style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{value}</span>} />
                             <Tooltip contentStyle={tooltipStyle} />
                         </PieChart>
                     </ResponsiveContainer>
@@ -171,65 +111,44 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Leaderboard */}
-            <div style={S.tableCard}>
-                <h3 style={S.chartTitle}>Validator Leaderboard</h3>
-                <table style={S.table}>
-                    <thead>
-                        <tr>
-                            <th style={S.th}>Rank</th>
-                            <th style={S.th}>Validator</th>
-                            <th style={S.th}>Blocks</th>
-                            <th style={S.th}>Uptime</th>
-                            <th style={{ ...S.th, minWidth: 140 }}>Performance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {validators
-                            .sort((a, b) => b.total_blocks - a.total_blocks)
-                            .map((v, i) => {
+            <div className="card animate-fade-up" style={{ padding: 0 }}>
+                <div style={{ padding: '20px 28px', borderBottom: '1px solid var(--border)' }}>
+                    <h3 className="heading-md" style={{ margin: 0 }}>Validator Leaderboard</h3>
+                </div>
+                <div style={{ padding: '0 28px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+                        <thead>
+                            <tr>
+                                {['Rank', 'Validator', 'Blocks', 'Uptime', 'Performance'].map(h => (
+                                    <th key={h} style={{ color: 'var(--text-muted)', fontWeight: 500, textAlign: 'left', padding: '14px 12px', borderBottom: '1px solid var(--border)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {validators.sort((a, b) => b.total_blocks - a.total_blocks).map((v, i) => {
                                 const uptime = parseFloat(v.uptime_percentage);
+                                const medals = ['\u{1F947}', '\u{1F948}', '\u{1F949}'];
                                 return (
                                     <tr key={v.id}>
-                                        <td style={S.td}>
-                                            <span style={{ fontSize: '1.1rem' }}>
-                                                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
-                                            </span>
+                                        <td style={{ padding: '14px 12px', borderBottom: '1px solid var(--border)', fontSize: '1rem' }}>
+                                            {i < 3 ? medals[i] : `#${i + 1}`}
                                         </td>
-                                        <td style={S.tdMuted}>{v.address}</td>
-                                        <td style={S.td}>{v.total_blocks.toLocaleString()}</td>
-                                        <td style={S.td}>
-                                            <span style={{
-                                                display: 'inline-block',
-                                                padding: '2px 10px',
-                                                borderRadius: '999px',
-                                                fontSize: '0.8rem',
-                                                fontWeight: 500,
-                                                background: uptime >= 90 ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
-                                                color: uptime >= 90 ? '#ededed' : '#a1a1aa',
-                                                border: `1px solid ${uptime >= 90 ? '#3f3f46' : '#1e1e2e'}`,
-                                            }}>
-                                                {uptime.toFixed(1)}%
-                                            </span>
+                                        <td style={{ padding: '14px 12px', borderBottom: '1px solid var(--border)', fontFamily: 'Space Grotesk, monospace', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{v.address}</td>
+                                        <td style={{ padding: '14px 12px', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>{v.total_blocks.toLocaleString()}</td>
+                                        <td style={{ padding: '14px 12px', borderBottom: '1px solid var(--border)' }}>
+                                            <span className={uptime >= 90 ? 'chip chip-green' : 'chip chip-orange'}>{uptime.toFixed(1)}%</span>
                                         </td>
-                                        <td style={S.td}>
-                                            <div style={{
-                                                width: '100%', maxWidth: 140, height: 6,
-                                                background: '#1e1e2e', borderRadius: 3, overflow: 'hidden'
-                                            }}>
-                                                <div style={{
-                                                    width: `${uptime}%`,
-                                                    height: '100%',
-                                                    background: uptime >= 90 ? '#ededed' : uptime >= 50 ? '#a1a1aa' : '#52525b',
-                                                    borderRadius: 3,
-                                                    transition: 'width 0.5s ease',
-                                                }} />
+                                        <td style={{ padding: '14px 12px', borderBottom: '1px solid var(--border)' }}>
+                                            <div style={{ width: '100%', maxWidth: 140, height: 6, background: 'var(--bg-surface)', borderRadius: 3, overflow: 'hidden' }}>
+                                                <div style={{ width: `${uptime}%`, height: '100%', background: uptime >= 90 ? 'var(--green)' : 'var(--orange)', borderRadius: 3, transition: 'width 0.5s ease' }} />
                                             </div>
                                         </td>
                                     </tr>
                                 );
                             })}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
