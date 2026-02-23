@@ -5,5 +5,6 @@ dist/
 *.log
 .next/
 contracts/cache/
-contracts/artifacts/
+contracts/artifacts/contracts/
+contracts/artifacts/@openzeppelin/
 contracts/typechain-types/
