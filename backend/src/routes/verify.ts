@@ -252,10 +252,44 @@ async function pollVerificationStatus(
             };
         }
         if (data.result && data.result.includes("Fail")) {
+            // Check if Blockscout verified it anyway (bytecode database match)
+            const isVerified = await checkIfVerified(contractAddress);
+            if (isVerified) {
+                return {
+                    verified: true,
+                    message: "Contract verified on Blockscout!",
+                    explorerUrl: `https://testnet.arcscan.app/address/${contractAddress}#code`,
+                };
+            }
             return { verified: false, message: data.result };
         }
     }
+    // Final check — Blockscout may have verified via bytecode database
+    const isVerified = await checkIfVerified(contractAddress);
+    if (isVerified) {
+        logger.info("Contract verified via bytecode database", { contractAddress });
+        return {
+            verified: true,
+            message: "Contract verified on Blockscout!",
+            explorerUrl: `https://testnet.arcscan.app/address/${contractAddress}#code`,
+        };
+    }
     return { verified: false, message: "Verification timed out — check Blockscout manually" };
+}
+
+async function checkIfVerified(contractAddress: string): Promise<boolean> {
+    try {
+        const res = await fetch(
+            `${BLOCKSCOUT_API}?module=contract&action=getsourcecode&address=${contractAddress}`
+        );
+        const data = (await res.json()) as any;
+        if (data.result && Array.isArray(data.result) && data.result.length > 0) {
+            return data.result[0].SourceCode && data.result[0].SourceCode.length > 0;
+        }
+        return false;
+    } catch {
+        return false;
+    }
 }
 
 export default router;
