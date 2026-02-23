@@ -113,7 +113,7 @@ export default function NFTStudioPage() {
                 const sigMessage = `ARC-Portal:${JSON.stringify(deployBody)}`;
                 const signature = await signMessage(sigMessage);
 
-                const deployRes = await fetch('/api/deploy/erc721', {
+                const deployRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/deploy/erc721`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
